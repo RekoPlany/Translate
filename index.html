@@ -3,25 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>وەرگێڕی Ultimate</title>
+    <title>وەرگێڕی Ultimate (دیزاینی تەواو)</title>
     
-    <!-- زیادکراوی نوێ بۆ PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2c3e50">
-    <link rel="apple-touch-icon" href="icon-192.png">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* ... هەموو کۆدی CSS وەک خۆی دەمێنێتەوە ... */
         :root {
             --bg-top: #2c3e50; --bg-bottom: #34495e;
             --panel-color: rgba(255, 255, 255, 0.05); --control-bar-color: rgba(0, 0, 0, 0.2);
             --text-color: #ecf0f1; --title-color: #ffffff; --placeholder-color: rgba(236, 240, 241, 0.4);
             --primary-color: #3498db; --secondary-color: #1abc9c;
             --bubble-user-color: #2980b9; --bubble-other-color: rgba(0,0,0,0.25);
+            --scroll-thumb: #34495e;
         }
 
         body.light-theme {
@@ -29,9 +24,10 @@
             --panel-color: #ffffff; --control-bar-color: #ffffff;
             --text-color: #2c3e50; --title-color: #161e2f; --placeholder-color: #95a5a6;
             --bubble-user-color: #dcf8c6; --bubble-other-color: #e5e5ea;
+            --scroll-thumb: #bdc3c7;
         }
 
-        html, body { height: 100vh; margin: 0; overflow: hidden; }
+        html, body { height: 100vh; margin: 0; overflow: hidden; transition: background 0.3s; }
         body { font-family: 'Poppins', 'Noto Naskh Arabic', sans-serif; color: var(--text-color); display: flex; flex-direction: column; }
 
         .person-panel {
@@ -58,9 +54,14 @@
         }
 
         .conversation-log { flex-grow: 1; overflow-y: auto; padding: 0 5px; min-height: 0; }
+        .conversation-log::-webkit-scrollbar { width: 6px; }
+        .conversation-log::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
         .chat-bubble { max-width: 80%; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; line-height: 1.6; }
         .chat-bubble.user { background: var(--bubble-user-color); margin-left: auto; border-bottom-right-radius: 2px; }
         .chat-bubble.other { background: var(--bubble-other-color); margin-right: auto; border-bottom-left-radius: 2px; }
+        .chat-bubble .original { font-size: 0.9em; opacity: 0.8; }
+        .chat-bubble .translated { font-weight: 600; }
+        body:not(.light-theme) .chat-bubble.user .original { color: var(--text-color); }
 
         .input-wrapper { display: flex; align-items: center; gap: 10px; }
         .text-input {
@@ -82,6 +83,7 @@
             display: inline-flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.2s;
         }
+        .mic-btn:hover { filter: brightness(1.1); }
         .mic-btn.listening { background: #e74c3c; transform: scale(1.1); animation: pulse 1.2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 100% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); } }
 
@@ -94,10 +96,43 @@
         .control-btn svg { width: 22px; height: 22px; stroke: var(--title-color); transition: all 0.3s; }
         #swap-btn.swapping svg { transform: rotate(180deg); }
         select.language-swapping { transform: scale(1.1); filter: brightness(1.2); transition: all 0.3s; }
+
+        /* --- STYLES FOR THE MODAL WINDOW --- */
+        .settings-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 20; 
+            /* Default state: hidden */
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.3s ease-in-out;
+        }
+        .settings-modal.active {
+            /* Active state: visible */
+            opacity: 1; 
+            pointer-events: all;
+        }
+        .settings-content {
+            background: var(--bg-bottom); color: var(--text-color);
+            padding: 25px; border-radius: 15px; width: 90%; max-width: 400px;
+            transform: scale(0.95); /* Start slightly smaller for pop-up effect */
+            transition: transform 0.3s ease-in-out;
+        }
+        .settings-modal.active .settings-content {
+            transform: scale(1); /* Pop-up to full size */
+        }
+        .settings-content h3 { text-align: center; margin-top: 0; }
+        .setting { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(24px); }
     </style>
 </head>
 <body>
-    <!-- HTML Body remains the same as the previous correct version -->
     <div class="settings-modal" id="settings-modal"></div>
     <div id="person2-panel" class="person-panel">
         <div class="panel-content">
@@ -126,22 +161,11 @@
             </div>
         </div>
     </div>
-<script>
-    // زیادکراوی نوێ بۆ تۆمارکردنی سێرڤس وۆرکەر
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').then(registration => {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            }, err => {
-                console.log('ServiceWorker registration failed: ', err);
-            });
-        });
-    }
 
-    // ... هەموو کۆدی JavaScriptـی پێشوو لێرەدا وەک خۆی دادەنرێتەوە ...
-    document.addEventListener('DOMContentLoaded', () => {
-        // ... (The entire previous, correct JavaScript code goes here)
-        const elements = {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Elements ---
+    const elements = {
         lang1: document.getElementById('lang1'), lang2: document.getElementById('lang2'),
         input1: document.getElementById('input1'), input2: document.getElementById('input2'),
         log1: document.getElementById('log1'), log2: document.getElementById('log2'),
@@ -149,138 +173,173 @@
         mic1Btn: document.getElementById('mic1-btn'), mic2Btn: document.getElementById('mic2-btn'),
         controlBar: document.getElementById('control-bar'),
         settingsModal: document.getElementById('settings-modal'),
+    };
+    
+    // --- Build Dynamic UI and THEN assign elements ---
+    elements.controlBar.innerHTML = `<button class="control-btn" id="settings-btn" title="ڕێکخستنەکان"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button><button class="control-btn" id="swap-btn" title="گۆڕینەوەی زمانەکان"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></button><button class="control-btn" id="fullscreen-btn" title="پڕکردنی شاشە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>`;
+    elements.settingsModal.innerHTML = `<div class="settings-content"><h3>ڕێکخستنەکان</h3><div class="setting"><span>خێرایی دەنگ</span> <input type="range" id="rate-slider" min="0.5" max="2" value="1" step="0.1"></div><div class="setting"><span>تۆنی دەنگ</span> <input type="range" id="pitch-slider" min="0" max="2" value="1" step="0.1"></div><div class="setting"><span>دۆخی ڕووناک</span><label class="switch"><input type="checkbox" id="theme-switch"><span class="slider"></span></label></div><button id="close-settings-btn" style="width:100%; padding:10px; border-radius:8px; border:none; background: var(--primary-color); color:white; cursor:pointer;">داخستن</button></div>`;
+    
+    // **CRITICAL FIX:** Re-assign elements AFTER they are created by innerHTML
+    elements.swapBtn = document.getElementById('swap-btn');
+    elements.settingsBtn = document.getElementById('settings-btn');
+    elements.fullscreenBtn = document.getElementById('fullscreen-btn');
+    elements.closeSettingsBtn = document.getElementById('close-settings-btn');
+    elements.rateSlider = document.getElementById('rate-slider');
+    elements.pitchSlider = document.getElementById('pitch-slider');
+    elements.themeSwitch = document.getElementById('theme-switch');
+
+    // --- Logic ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const synthesis = window.speechSynthesis;
+    if (!SpeechRecognition) { alert("Sorry, your browser doesn't support speech recognition."); return; }
+
+    const rec1 = new SpeechRecognition();
+    const rec2 = new SpeechRecognition();
+    const setupRec = (rec, lang) => { rec.lang = lang; rec.interimResults = true; rec.continuous = true; };
+    
+    const languages = [ { "code": "ckb-IQ", "name": "کوردی" }, { "code": "en-US", "name": "English" }, { "code": "ar-SA", "name": "العربية" }, { "code": "fa-IR", "name": "فارسی" }, { "code": "tr-TR", "name": "Türkçe" }, { "code": "de-DE", "name": "Deutsch" }, { "code": "es-ES", "name": "Español" }, { "code": "fr-FR", "name": "Français" }, { "code": "ru-RU", "name": "Русский" }, { "code": "zh-CN", "name": "中文" }, { "code": "ja-JP", "name": "日本語" }, { "code": "hi-IN", "name": "हिन्दी" }, { "code": "it-IT", "name": "Italiano" }, { "code": "pt-PT", "name": "Português" }, { "code": "nl-NL", "name": "Nederlands" }, { "code": "sv-SE", "name": "Svenska" }, { "code": "ko-KR", "name": "한국어" }, { "code": "pl-PL", "name": "Polski" }, { "code": "da-DK", "name": "Dansk" }, { "code": "fi-FI", "name": "Suomi" }, { "code": "nb-NO", "name": "Norsk" }, { "code": "el-GR", "name": "Ελληνικά" }, { "code": "hu-HU", "name": "Magyar" }, { "code": "cs-CZ", "name": "Čeština" }, { "code": "ro-RO", "name": "Română" }, { "code": "sk-SK", "name": "Slovenčina" }, { "code": "th-TH", "name": "ไทย" }, { "code": "id-ID", "name": "Bahasa Indonesia" }, { "code": "ms-MY", "name": "Bahasa Melayu" }, { "code": "vi-VN", "name": "Tiếng Việt" }, { "code": "af-ZA", "name": "Afrikaans" }, { "code": "sq-AL", "name": "Shqip" }, { "code": "am-ET", "name": "አማርኛ" }, { "code": "hy-AM", "name": "Հայերեն" }, { "code": "az-AZ", "name": "Azərbaycanca" }, { "code": "bn-BD", "name": "বাংলা" }, { "code": "bs-BA", "name": "Bosanski" }, { "code": "bg-BG", "name": "Български" }, { "code": "ca-ES", "name": "Català" }, { "code": "hr-HR", "name": "Hrvatski" }, { "code": "et-EE", "name": "Eesti" }, { "code": "gl-ES", "name": "Galego" }, { "code": "ka-GE", "name": "ქართული" }, { "code": "gu-IN", "name": "ગુજરાતી" }, { "code": "he-IL", "name": "עברית" }, { "code": "is-IS", "name": "Íslenska" }, { "code": "kn-IN", "name": "ಕನ್ನಡ" }, { "code": "km-KH", "name": "ភាសាខ្មែរ" }, { "code": "lo-LA", "name": "ລາວ" }, { "code": "lv-LV", "name": "Latviešu" }, { "code": "lt-LT", "name": "Lietuvių" }, { "code": "mk-MK", "name": "Македонски" }, { "code": "ml-IN", "name": "മലയാളം" }, { "code": "mr-IN", "name": "मराठी" } ];
+
+    function populateLanguages() {
+        languages.forEach(lang => {
+            elements.lang1.options.add(new Option(lang.name, lang.code));
+            elements.lang2.options.add(new Option(lang.name, lang.code));
+        });
+        elements.lang1.value = 'ckb-IQ';
+        elements.lang2.value = 'en-US';
+        setupRec(rec1, elements.lang1.value);
+        setupRec(rec2, elements.lang2.value);
+    }
+    populateLanguages();
+    
+    async function handleTranslation(text, sourceLog, targetLog, sourceLang, targetLang) {
+        if (!text.trim()) return;
+        
+        addMessage(text, '...', targetLog, false);
+        const lastBubble = targetLog.lastChild.querySelector('.translated');
+
+        try {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang.split('-')[0]}&tl=${targetLang.split('-')[0]}&dt=t&q=${encodeURIComponent(text)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            const translatedText = data[0][0][0];
+            lastBubble.textContent = translatedText;
+            speak(translatedText, targetLang);
+            
+            addMessage(text, translatedText, sourceLog, true);
+
+        } catch (err) { lastBubble.textContent = 'کێشە لە وەرگێڕان ڕوویدا.'; }
+    }
+
+    function addMessage(original, translated, log, isUser) {
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble ${isUser ? 'user' : 'other'}`;
+        bubble.innerHTML = `<div class="original">${original}</div><div class="translated">${translated}</div>`;
+        log.appendChild(bubble);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    let silenceTimer;
+    function startListening(rec, btn, inputField, sourceLog, targetLog, targetLang) {
+        if (btn.classList.contains('listening')) {
+            rec.stop(); return;
+        }
+
+        btn.classList.add('listening');
+        inputField.placeholder = 'گوێ دەگرم...';
+        rec.start();
+        
+        let final_transcript = '';
+        rec.onresult = e => {
+            clearTimeout(silenceTimer);
+            let interim_transcript = '';
+            for (let i = e.resultIndex; i < e.results.length; ++i) {
+                if (e.results[i].isFinal) final_transcript += e.results[i][0].transcript + ' ';
+                else interim_transcript += e.results[i][0].transcript;
+            }
+            inputField.value = final_transcript + interim_transcript;
+            
+            silenceTimer = setTimeout(() => rec.stop(), 1500);
         };
-        elements.controlBar.innerHTML = `<button class="control-btn" id="settings-btn" title="ڕێکخستنەکان"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button><button class="control-btn" id="swap-btn" title="گۆڕینەوەی زمانەکان"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></button><button class="control-btn" id="fullscreen-btn" title="پڕکردنی شاشە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>`;
-        elements.settingsModal.innerHTML = `<div class="settings-content"><h3>ڕێکخستنەکان</h3><div class="setting"><span>خێرایی دەنگ</span> <input type="range" id="rate-slider" min="0.5" max="2" value="1" step="0.1"></div><div class="setting"><span>تۆنی دەنگ</span> <input type="range" id="pitch-slider" min="0" max="2" value="1" step="0.1"></div><div class="setting"><span>دۆخی ڕووناک</span><label class="switch"><input type="checkbox" id="theme-switch"><span class="slider"></span></label></div><button id="close-settings-btn" style="width:100%; padding:10px; border-radius:8px; border:none; background: var(--primary-color); color:white; cursor:pointer;">داخستن</button></div>`;
-        elements.swapBtn = document.getElementById('swap-btn');
-        elements.settingsBtn = document.getElementById('settings-btn');
-        elements.fullscreenBtn = document.getElementById('fullscreen-btn');
-        elements.closeSettingsBtn = document.getElementById('close-settings-btn');
-        elements.rateSlider = document.getElementById('rate-slider');
-        elements.pitchSlider = document.getElementById('pitch-slider');
-        elements.themeSwitch = document.getElementById('theme-switch');
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const synthesis = window.speechSynthesis;
-        if (!SpeechRecognition) { alert("Sorry, your browser doesn't support speech recognition."); return; }
-        const rec1 = new SpeechRecognition();
-        const rec2 = new SpeechRecognition();
-        const setupRec = (rec, lang) => { rec.lang = lang; rec.interimResults = true; rec.continuous = true; };
-        const languages = [ { "code": "ckb-IQ", "name": "کوردی" }, { "code": "en-US", "name": "English" }, { "code": "ar-SA", "name": "العربية" }, { "code": "fa-IR", "name": "فارسی" }, { "code": "tr-TR", "name": "Türkçe" }, { "code": "de-DE", "name": "Deutsch" }, { "code": "es-ES", "name": "Español" }, { "code": "fr-FR", "name": "Français" }, { "code": "ru-RU", "name": "Русский" }, { "code": "zh-CN", "name": "中文" }, { "code": "ja-JP", "name": "日本語" }, { "code": "hi-IN", "name": "हिन्दी" }, { "code": "it-IT", "name": "Italiano" }, { "code": "pt-PT", "name": "Português" }, { "code": "nl-NL", "name": "Nederlands" }, { "code": "sv-SE", "name": "Svenska" }, { "code": "ko-KR", "name": "한국어" }, { "code": "pl-PL", "name": "Polski" }, { "code": "da-DK", "name": "Dansk" }, { "code": "fi-FI", "name": "Suomi" }, { "code": "nb-NO", "name": "Norsk" }, { "code": "el-GR", "name": "Ελληνικά" }, { "code": "hu-HU", "name": "Magyar" }, { "code": "cs-CZ", "name": "Čeština" }, { "code": "ro-RO", "name": "Română" }, { "code": "sk-SK", "name": "Slovenčina" }, { "code": "th-TH", "name": "ไทย" }, { "code": "id-ID", "name": "Bahasa Indonesia" }, { "code": "ms-MY", "name": "Bahasa Melayu" }, { "code": "vi-VN", "name": "Tiếng Việt" }, { "code": "af-ZA", "name": "Afrikaans" }, { "code": "sq-AL", "name": "Shqip" }, { "code": "am-ET", "name": "አማርኛ" }, { "code": "hy-AM", "name": "Հայերեն" }, { "code": "az-AZ", "name": "Azərbaycanca" }, { "code": "bn-BD", "name": "বাংলা" }, { "code": "bs-BA", "name": "Bosanski" }, { "code": "bg-BG", "name": "Български" }, { "code": "ca-ES", "name": "Català" }, { "code": "hr-HR", "name": "Hrvatski" }, { "code": "et-EE", "name": "Eesti" }, { "code": "gl-ES", "name": "Galego" }, { "code": "ka-GE", "name": "ქართული" }, { "code": "gu-IN", "name": "ગુજરાતી" }, { "code": "he-IL", "name": "עברית" }, { "code": "is-IS", "name": "Íslenska" }, { "code": "kn-IN", "name": "ಕನ್ನಡ" }, { "code": "km-KH", "name": "ភាសាខ្មែរ" }, { "code": "lo-LA", "name": "ລາວ" }, { "code": "lv-LV", "name": "Latviešu" }, { "code": "lt-LT", "name": "Lietuvių" }, { "code": "mk-MK", "name": "Македонски" }, { "code": "ml-IN", "name": "മലയാളം" }, { "code": "mr-IN", "name": "मराठी" } ];
-        function populateLanguages() {
-            languages.forEach(lang => {
-                elements.lang1.options.add(new Option(lang.name, lang.code));
-                elements.lang2.options.add(new Option(lang.name, lang.code));
-            });
-            elements.lang1.value = 'ckb-IQ';
-            elements.lang2.value = 'en-US';
+        
+        rec.onend = () => {
+            btn.classList.remove('listening');
+            inputField.placeholder = 'لێرە بنووسە...';
+            const textToTranslate = inputField.value.trim();
+            if (textToTranslate){
+                handleTranslation(textToTranslate, sourceLog, targetLog, rec.lang, targetLang);
+                inputField.value = '';
+                const sendBtn = (btn.id === 'mic1-btn') ? elements.send1Btn : elements.send2Btn;
+                sendBtn.disabled = true;
+            }
+        };
+    }
+    
+    elements.input1.addEventListener('input', () => { elements.send1Btn.disabled = elements.input1.value.trim() === ''; });
+    elements.input2.addEventListener('input', () => { elements.send2Btn.disabled = elements.input2.value.trim() === ''; });
+    
+    elements.send1Btn.addEventListener('click', () => {
+        handleTranslation(elements.input1.value, elements.log1, elements.log2, elements.lang1.value, elements.lang2.value);
+        elements.input1.value = '';
+        elements.send1Btn.disabled = true;
+    });
+    elements.send2Btn.addEventListener('click', () => {
+        handleTranslation(elements.input2.value, elements.log2, elements.log1, elements.lang2.value, elements.lang1.value);
+        elements.input2.value = '';
+        elements.send2Btn.disabled = true;
+    });
+    
+    elements.mic1Btn.addEventListener('click', () => startListening(rec1, elements.mic1Btn, elements.input1, elements.log1, elements.log2, elements.lang2.value));
+    elements.mic2Btn.addEventListener('click', () => startListening(rec2, elements.mic2Btn, elements.input2, elements.log2, elements.log1, elements.lang1.value));
+
+    function speak(text, lang) {
+        if (synthesis.speaking) synthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.rate = parseFloat(elements.rateSlider.value);
+        utterance.pitch = parseFloat(elements.pitchSlider.value);
+        synthesis.speak(utterance);
+    }
+    
+    elements.settingsBtn.addEventListener('click', () => elements.settingsModal.classList.add('active'));
+    elements.closeSettingsBtn.addEventListener('click', () => elements.settingsModal.classList.remove('active'));
+    elements.settingsModal.addEventListener('click', (e) => {
+        if (e.target === elements.settingsModal) {
+            elements.settingsModal.classList.remove('active');
+        }
+    });
+    
+    elements.swapBtn.addEventListener('click', () => {
+        elements.swapBtn.classList.add('swapping');
+        [elements.lang1, elements.lang2].forEach(el => el.classList.add('language-swapping'));
+
+        setTimeout(() => {
+            const tempLang = elements.lang1.value;
+            elements.lang1.value = elements.lang2.value;
+            elements.lang2.value = tempLang;
             setupRec(rec1, elements.lang1.value);
             setupRec(rec2, elements.lang2.value);
-        }
-        populateLanguages();
-        async function handleTranslation(text, sourceLog, targetLog, sourceLang, targetLang) {
-            if (!text.trim()) return;
-            addMessage(text, '...', targetLog, false);
-            const lastBubble = targetLog.lastChild.querySelector('.translated');
-            try {
-                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang.split('-')[0]}&tl=${targetLang.split('-')[0]}&dt=t&q=${encodeURIComponent(text)}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                const translatedText = data[0][0][0];
-                lastBubble.textContent = translatedText;
-                speak(translatedText, targetLang);
-                addMessage(text, translatedText, sourceLog, true);
-            } catch (err) { lastBubble.textContent = 'کێشە لە وەرگێڕان ڕوویدا.'; }
-        }
-        function addMessage(original, translated, log, isUser) {
-            const bubble = document.createElement('div');
-            bubble.className = `chat-bubble ${isUser ? 'user' : 'other'}`;
-            bubble.innerHTML = `<div class="original">${original}</div><div class="translated">${translated}</div>`;
-            log.appendChild(bubble);
-            log.scrollTop = log.scrollHeight;
-        }
-        let silenceTimer;
-        function startListening(rec, btn, inputField, sourceLog, targetLog, targetLang) {
-            if (btn.classList.contains('listening')) {
-                rec.stop(); return;
-            }
-            btn.classList.add('listening');
-            inputField.placeholder = 'گوێ دەگرم...';
-            rec.start();
-            let final_transcript = '';
-            rec.onresult = e => {
-                clearTimeout(silenceTimer);
-                let interim_transcript = '';
-                for (let i = e.resultIndex; i < e.results.length; ++i) {
-                    if (e.results[i].isFinal) final_transcript += e.results[i][0].transcript + ' ';
-                    else interim_transcript += e.results[i][0].transcript;
-                }
-                inputField.value = final_transcript + interim_transcript;
-                silenceTimer = setTimeout(() => rec.stop(), 1500);
-            };
-            rec.onend = () => {
-                btn.classList.remove('listening');
-                inputField.placeholder = 'لێرە بنووسە...';
-                const textToTranslate = inputField.value.trim();
-                if (textToTranslate){
-                    handleTranslation(textToTranslate, sourceLog, targetLog, rec.lang, targetLang);
-                    inputField.value = '';
-                    const sendBtn = (btn.id === 'mic1-btn') ? elements.send1Btn : elements.send2Btn;
-                    sendBtn.disabled = true;
-                }
-            };
-        }
-        elements.input1.addEventListener('input', () => { elements.send1Btn.disabled = elements.input1.value.trim() === ''; });
-        elements.input2.addEventListener('input', () => { elements.send2Btn.disabled = elements.input2.value.trim() === ''; });
-        elements.send1Btn.addEventListener('click', () => {
-            handleTranslation(elements.input1.value, elements.log1, elements.log2, elements.lang1.value, elements.lang2.value);
-            elements.input1.value = '';
-            elements.send1Btn.disabled = true;
-        });
-        elements.send2Btn.addEventListener('click', () => {
-            handleTranslation(elements.input2.value, elements.log2, elements.log1, elements.lang2.value, elements.lang1.value);
-            elements.input2.value = '';
-            elements.send2Btn.disabled = true;
-        });
-        elements.mic1Btn.addEventListener('click', () => startListening(rec1, elements.mic1Btn, elements.input1, elements.log1, elements.log2, elements.lang2.value));
-        elements.mic2Btn.addEventListener('click', () => startListening(rec2, elements.mic2Btn, elements.input2, elements.log2, elements.log1, elements.lang1.value));
-        function speak(text, lang) {
-            if (synthesis.speaking) synthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang;
-            utterance.rate = parseFloat(elements.rateSlider.value);
-            utterance.pitch = parseFloat(elements.pitchSlider.value);
-            synthesis.speak(utterance);
-        }
-        elements.settingsBtn.addEventListener('click', () => elements.settingsModal.classList.add('active'));
-        elements.closeSettingsBtn.addEventListener('click', () => elements.settingsModal.classList.remove('active'));
-        elements.swapBtn.addEventListener('click', () => {
-            elements.swapBtn.classList.add('swapping');
-            [elements.lang1, elements.lang2].forEach(el => el.classList.add('language-swapping'));
-            setTimeout(() => {
-                const tempLang = elements.lang1.value;
-                elements.lang1.value = elements.lang2.value;
-                elements.lang2.value = tempLang;
-                setupRec(rec1, elements.lang1.value);
-                setupRec(rec2, elements.lang2.value);
-            }, 300);
-            setTimeout(() => {
-                elements.swapBtn.classList.remove('swapping');
-                [elements.lang1, elements.lang2].forEach(el => el.classList.remove('language-swapping'));
-            }, 600);
-        });
-        elements.themeSwitch.addEventListener('change', () => {
-            document.body.classList.toggle('light-theme', elements.themeSwitch.checked);
-            localStorage.setItem('theme', elements.themeSwitch.checked ? 'light' : 'dark');
-        });
-        if (localStorage.getItem('theme') === 'light') {
-            elements.themeSwitch.checked = true;
-            document.body.classList.add('light-theme');
-        }
-        elements.fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
-        });
+        }, 300);
+
+        setTimeout(() => {
+             elements.swapBtn.classList.remove('swapping');
+             [elements.lang1, elements.lang2].forEach(el => el.classList.remove('language-swapping'));
+        }, 600);
     });
+    
+    elements.themeSwitch.addEventListener('change', () => {
+        document.body.classList.toggle('light-theme', elements.themeSwitch.checked);
+        localStorage.setItem('theme', elements.themeSwitch.checked ? 'light' : 'dark');
+    });
+    if (localStorage.getItem('theme') === 'light') {
+        elements.themeSwitch.checked = true;
+        document.body.classList.add('light-theme');
+    }
+
+    elements.fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+    });
+});
 </script>
 </body>
 </html>
