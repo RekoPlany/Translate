@@ -3,343 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>وەرگێڕی Ultimate (دیزاینی تەواو)</title>
+    <title>Project Apex</title>
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0B0E1E">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-top: #2c3e50; --bg-bottom: #34495e;
-            --panel-color: rgba(255, 255, 255, 0.05); --control-bar-color: rgba(0, 0, 0, 0.2);
-            --text-color: #ecf0f1; --title-color: #ffffff; --placeholder-color: rgba(236, 240, 241, 0.4);
-            --primary-color: #3498db; --secondary-color: #1abc9c;
-            --bubble-user-color: #2980b9; --bubble-other-color: rgba(0,0,0,0.25);
-            --scroll-thumb: #34495e;
+            --bg-color: #0B0E1E;
+            --panel-bg: rgba(23, 26, 48, 0.5);
+            --text-color: #E0E5F0;
+            --title-color: #FFFFFF;
+            --placeholder-color: rgba(224, 229, 240, 0.4);
+            --cyan-glow: #00FFFF;
+            --magenta-glow: #FF00FF;
+            --bubble-user-color: rgba(0, 255, 255, 0.15);
+            --bubble-other-color: rgba(255, 0, 255, 0.15);
+            --danger-color: #FF4757;
         }
-
+        
         body.light-theme {
-            --bg-top: #f4f7f6; --bg-bottom: #e9edee;
-            --panel-color: #ffffff; --control-bar-color: #ffffff;
-            --text-color: #2c3e50; --title-color: #161e2f; --placeholder-color: #95a5a6;
-            --bubble-user-color: #dcf8c6; --bubble-other-color: #e5e5ea;
-            --scroll-thumb: #bdc3c7;
+            --bg-color: #ffffff;
+            --panel-bg: rgba(240, 240, 240, 0.7);
+            --text-color: #212529;
+            --title-color: #000000;
+            --placeholder-color: #6c757d;
+            --bubble-user-color: #cfe2ff;
+            --bubble-other-color: #e9ecef;
         }
 
-        html, body { height: 100vh; margin: 0; overflow: hidden; transition: background 0.3s; }
-        body { font-family: 'Poppins', 'Noto Naskh Arabic', sans-serif; color: var(--text-color); display: flex; flex-direction: column; }
-
-        .person-panel {
-            height: 50vh; width: 100%; display: flex; align-items: center; justify-content: center;
-            padding: 10px;
-            box-sizing: border-box; background: var(--bg-top);
+        html { height: 100%; }
+        body {
+            font-family: 'Poppins', 'Noto Naskh Arabic', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            color: var(--text-color);
+            background: var(--bg-color);
+            transition: background 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
-        #person1-panel { background: var(--bg-bottom); }
 
+        .person-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; min-height: 0; }
+        
         .panel-content {
-            width: 100%; max-width: 700px; height: 100%; background: var(--panel-color);
-            border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: 15px;
+            width: 100%; max-width: 700px; height: 100%;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 15px 20px;
             box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;
+            transition: box-shadow 0.4s ease, background 0.3s ease;
         }
 
+        body:not(.light-theme) #person1-panel .panel-content { box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); }
+        body:not(.light-theme) #person2-panel .panel-content { transform: rotate(180deg); box-shadow: 0 0 20px rgba(255, 0, 255, 0.2); }
         #person2-panel .panel-content { transform: rotate(180deg); }
         
         .panel-header { display: flex; justify-content: space-between; align-items: center; }
         .panel-header h2 { margin: 0; color: var(--title-color); font-size: 1.2rem; }
-        .panel-header select {
-            background: rgba(0,0,0,0.2); color: var(--text-color); border-radius: 8px;
-            border: 1px solid transparent; padding: 8px;
-        }
+        .panel-header select { background: rgba(0,0,0,0.2); color: var(--text-color); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); padding: 8px; font-family: inherit; }
+        body.light-theme .panel-header select { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
 
-        .conversation-log { flex-grow: 1; overflow-y: auto; padding: 0 5px; min-height: 0; }
-        .conversation-log::-webkit-scrollbar { width: 6px; }
-        .conversation-log::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
-        .chat-bubble { max-width: 80%; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; line-height: 1.6; }
-        .chat-bubble.user { background: var(--bubble-user-color); margin-left: auto; border-bottom-right-radius: 2px; }
-        .chat-bubble.other { background: var(--bubble-other-color); margin-right: auto; border-bottom-left-radius: 2px; }
-        .chat-bubble .original { font-size: 0.9em; opacity: 0.8; }
-        .chat-bubble .translated { font-weight: 600; }
-        body:not(.light-theme) .chat-bubble.user .original { color: var(--text-color); }
-
-        .input-wrapper { display: flex; align-items: center; gap: 10px; }
-        .text-input {
-            flex-grow: 1; background: rgba(0,0,0,0.1); color: var(--text-color);
-            border: 1px solid transparent; border-radius: 20px; padding: 10px 15px;
-            font-family: inherit; font-size: 1rem; resize: none;
-        }
-        .send-btn {
-            background: var(--primary-color); border: none; border-radius: 50%; width: 42px; height: 42px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
-            transition: opacity 0.2s, background 0.2s;
-        }
-        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #7f8c8d; }
+        .conversation-log { flex-grow: 1; overflow-y: auto; padding: 10px 5px 0 5px; min-height: 0; }
         
-        .mic-wrapper { text-align: center; padding: 5px 0; }
-        .mic-btn {
-            background: var(--secondary-color); border: none; border-radius: 50%;
-            width: 60px; height: 60px; cursor: pointer;
-            display: inline-flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.2s;
-        }
-        .mic-btn:hover { filter: brightness(1.1); }
-        .mic-btn.listening { background: #e74c3c; transform: scale(1.1); animation: pulse 1.2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 100% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); } }
+        .bubble-wrapper { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 10px; }
+        .bubble-wrapper.user { justify-content: flex-end; }
+        
+        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; line-height: 1.6; position: relative; }
+        #person1-panel .chat-bubble.user { background: var(--bubble-user-color); border: 1px solid rgba(0, 255, 255, 0.3); border-bottom-right-radius: 4px; }
+        #person1-panel .chat-bubble.other { background: var(--bubble-other-color); border: 1px solid rgba(255, 0, 255, 0.3); border-bottom-left-radius: 4px; }
+        #person2-panel .chat-bubble.user { background: var(--bubble-other-color); border: 1px solid rgba(255, 0, 255, 0.3); border-bottom-right-radius: 4px; }
+        #person2-panel .chat-bubble.other { background: var(--bubble-user-color); border: 1px solid rgba(0, 255, 255, 0.3); border-bottom-left-radius: 4px; }
+        
+        .chat-bubble .original { font-size: 0.9em; opacity: 0.7; }
+        .chat-bubble .translated { font-weight: 600; color: var(--title-color); }
+        body.translation-only .original { display: none; }
+        
+        .speak-bubble-btn { background: none; border: none; cursor: pointer; padding: 5px; opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0; }
+        .speak-bubble-btn svg { width: 20px; height: 20px; stroke: var(--text-color); pointer-events: none; }
+        
+        .input-wrapper { margin-top: auto; }
+        .text-input { width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2); color: var(--text-color); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 12px 18px; font-family: inherit; font-size: 1rem; resize: none; }
+        body.light-theme .text-input { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
+        .text-input:focus { outline: none; border-color: var(--cyan-glow); box-shadow: 0 0 10px var(--cyan-glow); }
+        
+        .smart-btn-wrapper { text-align: center; padding: 10px 0 0 0; }
+        .smart-btn { border: none; border-radius: 50%; width: 60px; height: 60px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .smart-btn svg { position: absolute; transition: transform 0.3s ease, opacity 0.3s ease; width: 30px; height: 30px; }
+        .smart-btn .mic-icon { transform: scale(1); opacity: 1; }
+        .smart-btn .send-icon { transform: scale(0); opacity: 0; }
+        .smart-btn.send-mode .mic-icon { transform: scale(0); opacity: 0; }
+        .smart-btn.send-mode .send-icon { transform: scale(1); opacity: 1; }
+        #person1-panel .smart-btn { background: var(--cyan-glow); box-shadow: 0 0 15px var(--cyan-glow); }
+        #person2-panel .smart-btn { background: var(--magenta-glow); box-shadow: 0 0 15px var(--magenta-glow); }
+        .smart-btn.listening { background: var(--danger-color); transform: scale(1.1); box-shadow: 0 0 20px var(--danger-color); }
 
-        .control-bar {
+        .command-dock {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--control-bar-color); backdrop-filter: blur(10px);
+            background: var(--panel-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             padding: 8px; border-radius: 50px; display: flex; gap: 10px; z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .control-btn { background: none; border: none; cursor: pointer; padding: 10px; }
         .control-btn svg { width: 22px; height: 22px; stroke: var(--title-color); transition: all 0.3s; }
-        #swap-btn.swapping svg { transform: rotate(180deg); }
-        select.language-swapping { transform: scale(1.1); filter: brightness(1.2); transition: all 0.3s; }
-
-        /* --- STYLES FOR THE MODAL WINDOW --- */
-        .settings-modal {
+        .control-btn:hover svg { stroke: var(--cyan-glow); }
+        
+        .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 20; 
-            /* Default state: hidden */
-            opacity: 0; 
-            pointer-events: none; 
-            transition: opacity 0.3s ease-in-out;
+            display: flex; justify-content: center; align-items: center; z-index: 20; 
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out;
         }
-        .settings-modal.active {
-            /* Active state: visible */
-            opacity: 1; 
-            pointer-events: all;
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: var(--panel-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            color: var(--text-color); padding: 25px; border-radius: 15px; width: 90%; max-width: 400px;
+            transform: scale(0.95); transition: transform 0.3s ease-in-out;
+            border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;
         }
-        .settings-content {
-            background: var(--bg-bottom); color: var(--text-color);
-            padding: 25px; border-radius: 15px; width: 90%; max-width: 400px;
-            transform: scale(0.95); /* Start slightly smaller for pop-up effect */
-            transition: transform 0.3s ease-in-out;
-        }
-        .settings-modal.active .settings-content {
-            transform: scale(1); /* Pop-up to full size */
-        }
-        .settings-content h3 { text-align: center; margin-top: 0; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-content h3 { margin-top: 0; }
         .setting { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(24px); }
+        .confirm-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .confirm-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+        #confirm-ok-btn { background-color: var(--danger-color); color: white; }
+        #confirm-cancel-btn { background-color: rgba(255,255,255,0.2); color: white; }
+        
+        @media (min-width: 800px) {
+            body { flex-direction: row; }
+            #person2-panel .panel-content { transform: rotate(0deg); }
+            .command-dock { top: 40px; left: 50%; }
+        }
     </style>
 </head>
 <body>
-    <div class="settings-modal" id="settings-modal"></div>
+    <div class="modal-overlay" id="settings-modal"></div>
+    <div class="modal-overlay" id="confirm-modal"></div>
+    <div id="toast-notification"></div>
     <div id="person2-panel" class="person-panel">
         <div class="panel-content">
-            <div class="panel-header"><h2>کەسی دووەم</h2> <select id="lang2"></select></div>
+            <div class="panel-header"><h2>Person 2</h2> <select id="lang2"></select></div>
             <div class="conversation-log" id="log2"></div>
             <div class="input-wrapper">
-                <input type="text" class="text-input" id="input2" placeholder="لێرە بنووسە...">
-                <button class="send-btn" id="send2-btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
+                <input type="text" class="text-input" id="input2" placeholder="Type or speak...">
             </div>
-            <div class="mic-wrapper">
-                <button class="mic-btn" id="mic2-btn"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="30" height="30"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg></button>
-            </div>
+            <div class="smart-btn-wrapper"><button class="smart-btn" id="smart-btn2"></button></div>
         </div>
     </div>
-    <div class="control-bar" id="control-bar"></div>
+    <div class="command-dock" id="command-dock"></div>
     <div id="person1-panel" class="person-panel">
         <div class="panel-content">
-            <div class="panel-header"><h2>کەسی یەکەم</h2> <select id="lang1"></select></div>
+            <div class="panel-header"><h2>Person 1</h2> <select id="lang1"></select></div>
             <div class="conversation-log" id="log1"></div>
             <div class="input-wrapper">
-                <input type="text" class="text-input" id="input1" placeholder="لێرە بنووسە...">
-                <button class="send-btn" id="send1-btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
+                <input type="text" class="text-input" id="input1" placeholder="Type or speak...">
             </div>
-            <div class="mic-wrapper">
-                <button class="mic-btn" id="mic1-btn"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="30" height="30"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg></button>
-            </div>
+            <div class="smart-btn-wrapper"><button class="smart-btn" id="smart-btn1"></button></div>
         </div>
     </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Elements ---
-    const elements = {
-        lang1: document.getElementById('lang1'), lang2: document.getElementById('lang2'),
-        input1: document.getElementById('input1'), input2: document.getElementById('input2'),
-        log1: document.getElementById('log1'), log2: document.getElementById('log2'),
-        send1Btn: document.getElementById('send1-btn'), send2Btn: document.getElementById('send2-btn'),
-        mic1Btn: document.getElementById('mic1-btn'), mic2Btn: document.getElementById('mic2-btn'),
-        controlBar: document.getElementById('control-bar'),
-        settingsModal: document.getElementById('settings-modal'),
-    };
-    
-    // --- Build Dynamic UI and THEN assign elements ---
-    elements.controlBar.innerHTML = `<button class="control-btn" id="settings-btn" title="ڕێکخستنەکان"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button><button class="control-btn" id="swap-btn" title="گۆڕینەوەی زمانەکان"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></button><button class="control-btn" id="fullscreen-btn" title="پڕکردنی شاشە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>`;
-    elements.settingsModal.innerHTML = `<div class="settings-content"><h3>ڕێکخستنەکان</h3><div class="setting"><span>خێرایی دەنگ</span> <input type="range" id="rate-slider" min="0.5" max="2" value="1" step="0.1"></div><div class="setting"><span>تۆنی دەنگ</span> <input type="range" id="pitch-slider" min="0" max="2" value="1" step="0.1"></div><div class="setting"><span>دۆخی ڕووناک</span><label class="switch"><input type="checkbox" id="theme-switch"><span class="slider"></span></label></div><button id="close-settings-btn" style="width:100%; padding:10px; border-radius:8px; border:none; background: var(--primary-color); color:white; cursor:pointer;">داخستن</button></div>`;
-    
-    // **CRITICAL FIX:** Re-assign elements AFTER they are created by innerHTML
-    elements.swapBtn = document.getElementById('swap-btn');
-    elements.settingsBtn = document.getElementById('settings-btn');
-    elements.fullscreenBtn = document.getElementById('fullscreen-btn');
-    elements.closeSettingsBtn = document.getElementById('close-settings-btn');
-    elements.rateSlider = document.getElementById('rate-slider');
-    elements.pitchSlider = document.getElementById('pitch-slider');
-    elements.themeSwitch = document.getElementById('theme-switch');
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
 
-    // --- Logic ---
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const synthesis = window.speechSynthesis;
-    if (!SpeechRecognition) { alert("Sorry, your browser doesn't support speech recognition."); return; }
+    document.addEventListener('DOMContentLoaded', () => {
+        const elements = {
+            body: document.body, lang1: document.getElementById('lang1'), lang2: document.getElementById('lang2'),
+            input1: document.getElementById('input1'), input2: document.getElementById('input2'),
+            log1: document.getElementById('log1'), log2: document.getElementById('log2'),
+            smartBtn1: document.getElementById('smart-btn1'), smartBtn2: document.getElementById('smart-btn2'),
+            commandDock: document.getElementById('command-dock'),
+            settingsModal: document.getElementById('settings-modal'),
+            confirmModal: document.getElementById('confirm-modal'),
+        };
 
-    const rec1 = new SpeechRecognition();
-    const rec2 = new SpeechRecognition();
-    const setupRec = (rec, lang) => { rec.lang = lang; rec.interimResults = true; rec.continuous = true; };
-    
-    const languages = [ { "code": "ckb-IQ", "name": "کوردی" }, { "code": "en-US", "name": "English" }, { "code": "ar-SA", "name": "العربية" }, { "code": "fa-IR", "name": "فارسی" }, { "code": "tr-TR", "name": "Türkçe" }, { "code": "de-DE", "name": "Deutsch" }, { "code": "es-ES", "name": "Español" }, { "code": "fr-FR", "name": "Français" }, { "code": "ru-RU", "name": "Русский" }, { "code": "zh-CN", "name": "中文" }, { "code": "ja-JP", "name": "日本語" }, { "code": "hi-IN", "name": "हिन्दी" }, { "code": "it-IT", "name": "Italiano" }, { "code": "pt-PT", "name": "Português" }, { "code": "nl-NL", "name": "Nederlands" }, { "code": "sv-SE", "name": "Svenska" }, { "code": "ko-KR", "name": "한국어" }, { "code": "pl-PL", "name": "Polski" }, { "code": "da-DK", "name": "Dansk" }, { "code": "fi-FI", "name": "Suomi" }, { "code": "nb-NO", "name": "Norsk" }, { "code": "el-GR", "name": "Ελληνικά" }, { "code": "hu-HU", "name": "Magyar" }, { "code": "cs-CZ", "name": "Čeština" }, { "code": "ro-RO", "name": "Română" }, { "code": "sk-SK", "name": "Slovenčina" }, { "code": "th-TH", "name": "ไทย" }, { "code": "id-ID", "name": "Bahasa Indonesia" }, { "code": "ms-MY", "name": "Bahasa Melayu" }, { "code": "vi-VN", "name": "Tiếng Việt" }, { "code": "af-ZA", "name": "Afrikaans" }, { "code": "sq-AL", "name": "Shqip" }, { "code": "am-ET", "name": "አማርኛ" }, { "code": "hy-AM", "name": "Հայերեն" }, { "code": "az-AZ", "name": "Azərbaycanca" }, { "code": "bn-BD", "name": "বাংলা" }, { "code": "bs-BA", "name": "Bosanski" }, { "code": "bg-BG", "name": "Български" }, { "code": "ca-ES", "name": "Català" }, { "code": "hr-HR", "name": "Hrvatski" }, { "code": "et-EE", "name": "Eesti" }, { "code": "gl-ES", "name": "Galego" }, { "code": "ka-GE", "name": "ქართული" }, { "code": "gu-IN", "name": "ગુજરાતી" }, { "code": "he-IL", "name": "עברית" }, { "code": "is-IS", "name": "Íslenska" }, { "code": "kn-IN", "name": "ಕನ್ನಡ" }, { "code": "km-KH", "name": "ភាសាខ្មែរ" }, { "code": "lo-LA", "name": "ລາວ" }, { "code": "lv-LV", "name": "Latviešu" }, { "code": "lt-LT", "name": "Lietuvių" }, { "code": "mk-MK", "name": "Македонски" }, { "code": "ml-IN", "name": "മലയാളം" }, { "code": "mr-IN", "name": "मराठी" } ];
-
-    function populateLanguages() {
-        languages.forEach(lang => {
-            elements.lang1.options.add(new Option(lang.name, lang.code));
-            elements.lang2.options.add(new Option(lang.name, lang.code));
+        const icons = {
+            send: `<svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="#0B0E1E" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`,
+            mic: `<svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="#0B0E1E" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>`,
+            settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+            swap: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>`,
+            clear: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+            fullscreen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`,
+            speak: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+            sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
+            moon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+        };
+        
+        // --- Build UI ---
+        elements.smartBtn1.innerHTML = icons.mic + icons.send;
+        elements.smartBtn2.innerHTML = icons.mic + icons.send;
+        elements.commandDock.innerHTML = `<button class="control-btn" id="settings-btn" title="Settings">${icons.settings}</button><button class="control-btn" id="swap-btn" title="Swap Languages">${icons.swap}</button><button class="control-btn" id="clear-btn" title="Clear Chat">${icons.clear}</button><button class="control-btn" id="fullscreen-btn" title="Fullscreen">${icons.fullscreen}</button>`;
+        elements.settingsModal.innerHTML = `<div class="modal-content"><h3>Settings</h3><div class="setting"><span>Voice Speed</span><input type="range" id="rate-slider" min="0.5" max="2" value="1" step="0.1"></div><div class="setting"><span>Voice Pitch</span><input type="range" id="pitch-slider" min="0" max="2" value="1" step="0.1"></div><div class="setting"><span>Show Translation Only</span><label class="switch"><input type="checkbox" id="translation-only-switch"></label></div><div class="setting"><span>Theme</span><button id="theme-toggle-btn" class="control-btn"></button></div><button id="close-settings-btn" style="width:100%; padding:10px; border-radius:8px; border:none; background: var(--cyan-glow); color: #0B0E1E; cursor:pointer; margin-top:10px; font-weight:600;">Close</button></div>`;
+        
+        Object.assign(elements, {
+            swapBtn: document.getElementById('swap-btn'),
+            settingsBtn: document.getElementById('settings-btn'),
+            clearBtn: document.getElementById('clear-btn'),
+            fullscreenBtn: document.getElementById('fullscreen-btn'),
+            closeSettingsBtn: document.getElementById('close-settings-btn'),
+            rateSlider: document.getElementById('rate-slider'),
+            pitchSlider: document.getElementById('pitch-slider'),
+            themeToggleBtn: document.getElementById('theme-toggle-btn'),
+            translationOnlySwitch: document.getElementById('translation-only-switch')
         });
-        elements.lang1.value = 'ckb-IQ';
-        elements.lang2.value = 'en-US';
-        setupRec(rec1, elements.lang1.value);
-        setupRec(rec2, elements.lang2.value);
-    }
-    populateLanguages();
-    
-    async function handleTranslation(text, sourceLog, targetLog, sourceLang, targetLang) {
-        if (!text.trim()) return;
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const synthesis = window.speechSynthesis;
+        if (!SpeechRecognition) { alert("Sorry, your browser doesn't support speech recognition."); return; }
+        const rec1 = new SpeechRecognition();
+        const rec2 = new SpeechRecognition();
+        const setupRec = (rec, lang) => { rec.lang = lang; rec.interimResults = true; rec.continuous = true; };
+        const languages = [ { "code": "ckb-IQ", "name": "Kurdish (Sorani)" }, { "code": "en-US", "name": "English (US)" }, { "code": "ar-SA", "name": "Arabic" }, { "code": "fa-IR", "name": "Persian" }, { "code": "tr-TR", "name": "Turkish" }, { "code": "de-DE", "name": "German" }, { "code": "es-ES", "name": "Spanish" }, { "code": "fr-FR", "name": "French" }, { "code": "ru-RU", "name": "Russian" }, { "code": "zh-CN", "name": "Chinese (Mandarin)" }, { "code": "ja-JP", "name": "Japanese" }, { "code": "hi-IN", "name": "Hindi" }, { "code": "it-IT", "name": "Italian" }, { "code": "pt-PT", "name": "Portuguese" }, { "code": "nl-NL", "name": "Dutch" }, { "code": "sv-SE", "name": "Swedish" }, { "code": "ko-KR", "name": "Korean" }, { "code": "pl-PL", "name": "Polish" }, { "code": "da-DK", "name": "Danish" }, { "code": "fi-FI", "name": "Finnish" }, { "code": "nb-NO", "name": "Norwegian" }, { "code": "el-GR", "name": "Greek" }, { "code": "hu-HU", "name": "Hungarian" }, { "code": "cs-CZ", "name": "Czech" }, { "code": "ro-RO", "name": "Romanian" }, { "code": "sk-SK", "name": "Slovak" }, { "code": "th-TH", "name": "Thai" }, { "code": "id-ID", "name": "Indonesian" }, { "code": "ms-MY", "name": "Malay" }, { "code": "vi-VN", "name": "Vietnamese" }, { "code": "af-ZA", "name": "Afrikaans" }, { "code": "sq-AL", "name": "Albanian" }, { "code": "am-ET", "name": "Amharic" }, { "code": "hy-AM", "name": "Armenian" }, { "code": "az-AZ", "name": "Azerbaijani" }, { "code": "bn-BD", "name": "Bengali" }, { "code": "bs-BA", "name": "Bosnian" }, { "code": "bg-BG", "name": "Bulgarian" }, { "code": "ca-ES", "name": "Catalan" }, { "code": "hr-HR", "name": "Croatian" }, { "code": "et-EE", "name": "Estonian" }, { "code": "gl-ES", "name": "Galician" }, { "code": "ka-GE", "name": "Georgian" }, { "code": "gu-IN", "name": "Gujarati" }, { "code": "he-IL", "name": "Hebrew" }, { "code": "is-IS", "name": "Icelandic" }, { "code": "kn-IN", "name": "Kannada" }, { "code": "km-KH", "name": "Khmer" }, { "code": "lo-LA", "name": "Lao" }, { "code": "lv-LV", "name": "Latvian" }, { "code": "lt-LT", "name": "Lithuanian" }, { "code": "mk-MK", "name": "Macedonian" }, { "code": "ml-IN", "name": "Malayalam" }, { "code": "mr-IN", "name": "Marathi" } ];
+        function populateLanguages() { languages.forEach(lang => { elements.lang1.options.add(new Option(lang.name, lang.code)); elements.lang2.options.add(new Option(lang.name, lang.code)); }); elements.lang1.value = 'ckb-IQ'; elements.lang2.value = 'en-US'; setupRec(rec1, elements.lang1.value); setupRec(rec2, elements.lang2.value); }
+        populateLanguages();
+        async function handleTranslation(text, sourceLog, targetLog, sourceLang, targetLang) { if (!text.trim()) return; const typingIndicator = `<div class="typing-indicator"><span></span><span></span><span></span></div>`; addMessage(text, typingIndicator, targetLog, false, targetLang); const lastBubbleWrapper = targetLog.lastChild; const lastBubble = lastBubbleWrapper.querySelector('.translated'); try { const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang.split('-')[0]}&tl=${targetLang.split('-')[0]}&dt=t&q=${encodeURIComponent(text)}`; const res = await fetch(url); const data = await res.json(); const translatedText = data[0][0][0]; lastBubbleWrapper.dataset.translatedText = translatedText; lastBubble.innerHTML = translatedText; speak(translatedText, targetLang); addMessage(text, translatedText, sourceLog, true, sourceLang); } catch (err) { lastBubble.textContent = 'Error in translation.'; } }
+        function addMessage(original, translated, log, isUser, langCode) { const wrapper = document.createElement('div'); wrapper.className = `bubble-wrapper ${isUser ? 'user' : 'other'}`; wrapper.dataset.lang = langCode; const bubble = document.createElement('div'); bubble.className = `chat-bubble ${isUser ? 'user' : 'other'}`; bubble.innerHTML = `<div class="original">${original}</div><div class="translated">${translated}</div>`; const speakBtn = document.createElement('button'); speakBtn.className = 'speak-bubble-btn'; speakBtn.innerHTML = icons.speak; if (isUser) { wrapper.appendChild(speakBtn); wrapper.appendChild(bubble); } else { wrapper.appendChild(bubble); wrapper.appendChild(speakBtn); } log.appendChild(wrapper); log.scrollTop = log.scrollHeight; }
+        let silenceTimer;
+        function startListening(rec, btn, inputField, sourceLog, targetLog, targetLang) { if (btn.classList.contains('listening')) { rec.stop(); return; } btn.classList.add('listening'); inputField.placeholder = 'Listening...'; rec.start(); let final_transcript = ''; rec.onresult = e => { clearTimeout(silenceTimer); let interim_transcript = ''; for (let i = e.resultIndex; i < e.results.length; ++i) { if (e.results[i].isFinal) final_transcript += e.results[i][0].transcript + ' '; else interim_transcript += e.results[i][0].transcript; } inputField.value = final_transcript + interim_transcript; updateSmartButton(inputField, btn); silenceTimer = setTimeout(() => rec.stop(), 1500); }; rec.onend = () => { btn.classList.remove('listening'); inputField.placeholder = 'Type or speak...'; const textToTranslate = inputField.value.trim(); if (textToTranslate){ handleTranslation(textToTranslate, sourceLog, targetLog, rec.lang, targetLang); inputField.value = ''; updateSmartButton(inputField, btn); } }; }
+        function updateSmartButton(input, btn) { if (input.value.trim()) { btn.classList.add('send-mode'); } else { btn.classList.remove('send-mode'); } }
+        elements.input1.addEventListener('input', () => updateSmartButton(elements.input1, elements.smartBtn1));
+        elements.input2.addEventListener('input', () => updateSmartButton(elements.input2, elements.smartBtn2));
+        elements.smartBtn1.addEventListener('click', () => { if (elements.smartBtn1.classList.contains('send-mode')) { handleTranslation(elements.input1.value, elements.log1, elements.log2, elements.lang1.value, elements.lang2.value); elements.input1.value = ''; updateSmartButton(elements.input1, elements.smartBtn1); } else { startListening(rec1, elements.smartBtn1, elements.input1, elements.log1, elements.log2, elements.lang2.value); } });
+        elements.smartBtn2.addEventListener('click', () => { if (elements.smartBtn2.classList.contains('send-mode')) { handleTranslation(elements.input2.value, elements.log2, elements.log1, elements.lang2.value, elements.lang1.value); elements.input2.value = ''; updateSmartButton(elements.input2, elements.smartBtn2); } else { startListening(rec2, elements.smartBtn2, elements.input2, elements.log2, elements.log1, elements.lang1.value); } });
+        function speak(text, lang) { if (synthesis.speaking) synthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.lang = lang; utterance.rate = parseFloat(elements.rateSlider.value); utterance.pitch = parseFloat(elements.pitchSlider.value); synthesis.speak(utterance); }
+        [elements.log1, elements.log2].forEach(log => { log.addEventListener('click', e => { const speakBtn = e.target.closest('.speak-bubble-btn'); if (speakBtn) { const wrapper = speakBtn.closest('.bubble-wrapper'); const textToSpeak = wrapper.querySelector('.translated').textContent; const lang = wrapper.dataset.lang; if (textToSpeak && textToSpeak !== '...') { speak(textToSpeak, lang); } } }); });
+        function showConfirmation(message, onConfirm) { elements.confirmModal.innerHTML = `<div class="modal-content"><p>${message}</p><div class="confirm-actions"><button id="confirm-cancel-btn" class="confirm-btn">Cancel</button><button id="confirm-ok-btn" class="confirm-btn">Yes, Clear</button></div></div>`; elements.confirmModal.classList.add('active'); document.getElementById('confirm-ok-btn').onclick = () => { onConfirm(); elements.confirmModal.classList.remove('active'); }; const cancel = () => elements.confirmModal.classList.remove('active'); document.getElementById('confirm-cancel-btn').onclick = cancel; elements.confirmModal.onclick = (e) => { if(e.target === elements.confirmModal) cancel(); }; }
+        elements.settingsBtn.addEventListener('click', () => elements.settingsModal.classList.add('active'));
+        elements.closeSettingsBtn.addEventListener('click', () => elements.settingsModal.classList.remove('active'));
+        elements.settingsModal.addEventListener('click', e => { if (e.target === elements.settingsModal) elements.settingsModal.classList.remove('active'); });
+        elements.clearBtn.addEventListener('click', () => { showConfirmation("Are you sure you want to clear the entire conversation?", () => { elements.log1.innerHTML = ''; elements.log2.innerHTML = ''; }); });
+        elements.swapBtn.addEventListener('click', () => { const tempLang = elements.lang1.value; elements.lang1.value = elements.lang2.value; elements.lang2.value = tempLang; setupRec(rec1, elements.lang1.value); setupRec(rec2, elements.lang2.value); });
+        elements.translationOnlySwitch.addEventListener('change', () => { elements.body.classList.toggle('translation-only', elements.translationOnlySwitch.checked); });
+        elements.fullscreenBtn.addEventListener('click', () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); });
         
-        addMessage(text, '...', targetLog, false);
-        const lastBubble = targetLog.lastChild.querySelector('.translated');
-
-        try {
-            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang.split('-')[0]}&tl=${targetLang.split('-')[0]}&dt=t&q=${encodeURIComponent(text)}`;
-            const res = await fetch(url);
-            const data = await res.json();
-            const translatedText = data[0][0][0];
-            lastBubble.textContent = translatedText;
-            speak(translatedText, targetLang);
-            
-            addMessage(text, translatedText, sourceLog, true);
-
-        } catch (err) { lastBubble.textContent = 'کێشە لە وەرگێڕان ڕوویدا.'; }
-    }
-
-    function addMessage(original, translated, log, isUser) {
-        const bubble = document.createElement('div');
-        bubble.className = `chat-bubble ${isUser ? 'user' : 'other'}`;
-        bubble.innerHTML = `<div class="original">${original}</div><div class="translated">${translated}</div>`;
-        log.appendChild(bubble);
-        log.scrollTop = log.scrollHeight;
-    }
-
-    let silenceTimer;
-    function startListening(rec, btn, inputField, sourceLog, targetLog, targetLang) {
-        if (btn.classList.contains('listening')) {
-            rec.stop(); return;
-        }
-
-        btn.classList.add('listening');
-        inputField.placeholder = 'گوێ دەگرم...';
-        rec.start();
-        
-        let final_transcript = '';
-        rec.onresult = e => {
-            clearTimeout(silenceTimer);
-            let interim_transcript = '';
-            for (let i = e.resultIndex; i < e.results.length; ++i) {
-                if (e.results[i].isFinal) final_transcript += e.results[i][0].transcript + ' ';
-                else interim_transcript += e.results[i][0].transcript;
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                elements.body.classList.add('light-theme');
+                elements.themeToggleBtn.innerHTML = icons.moon;
+            } else {
+                elements.body.classList.remove('light-theme');
+                elements.themeToggleBtn.innerHTML = icons.sun;
             }
-            inputField.value = final_transcript + interim_transcript;
-            
-            silenceTimer = setTimeout(() => rec.stop(), 1500);
-        };
-        
-        rec.onend = () => {
-            btn.classList.remove('listening');
-            inputField.placeholder = 'لێرە بنووسە...';
-            const textToTranslate = inputField.value.trim();
-            if (textToTranslate){
-                handleTranslation(textToTranslate, sourceLog, targetLog, rec.lang, targetLang);
-                inputField.value = '';
-                const sendBtn = (btn.id === 'mic1-btn') ? elements.send1Btn : elements.send2Btn;
-                sendBtn.disabled = true;
-            }
-        };
-    }
-    
-    elements.input1.addEventListener('input', () => { elements.send1Btn.disabled = elements.input1.value.trim() === ''; });
-    elements.input2.addEventListener('input', () => { elements.send2Btn.disabled = elements.input2.value.trim() === ''; });
-    
-    elements.send1Btn.addEventListener('click', () => {
-        handleTranslation(elements.input1.value, elements.log1, elements.log2, elements.lang1.value, elements.lang2.value);
-        elements.input1.value = '';
-        elements.send1Btn.disabled = true;
-    });
-    elements.send2Btn.addEventListener('click', () => {
-        handleTranslation(elements.input2.value, elements.log2, elements.log1, elements.lang2.value, elements.lang1.value);
-        elements.input2.value = '';
-        elements.send2Btn.disabled = true;
-    });
-    
-    elements.mic1Btn.addEventListener('click', () => startListening(rec1, elements.mic1Btn, elements.input1, elements.log1, elements.log2, elements.lang2.value));
-    elements.mic2Btn.addEventListener('click', () => startListening(rec2, elements.mic2Btn, elements.input2, elements.log2, elements.log1, elements.lang1.value));
-
-    function speak(text, lang) {
-        if (synthesis.speaking) synthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = lang;
-        utterance.rate = parseFloat(elements.rateSlider.value);
-        utterance.pitch = parseFloat(elements.pitchSlider.value);
-        synthesis.speak(utterance);
-    }
-    
-    elements.settingsBtn.addEventListener('click', () => elements.settingsModal.classList.add('active'));
-    elements.closeSettingsBtn.addEventListener('click', () => elements.settingsModal.classList.remove('active'));
-    elements.settingsModal.addEventListener('click', (e) => {
-        if (e.target === elements.settingsModal) {
-            elements.settingsModal.classList.remove('active');
         }
+        elements.themeToggleBtn.addEventListener('click', () => {
+            const newTheme = elements.body.classList.contains('light-theme') ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+        applyTheme(localStorage.getItem('theme') || 'dark');
     });
-    
-    elements.swapBtn.addEventListener('click', () => {
-        elements.swapBtn.classList.add('swapping');
-        [elements.lang1, elements.lang2].forEach(el => el.classList.add('language-swapping'));
-
-        setTimeout(() => {
-            const tempLang = elements.lang1.value;
-            elements.lang1.value = elements.lang2.value;
-            elements.lang2.value = tempLang;
-            setupRec(rec1, elements.lang1.value);
-            setupRec(rec2, elements.lang2.value);
-        }, 300);
-
-        setTimeout(() => {
-             elements.swapBtn.classList.remove('swapping');
-             [elements.lang1, elements.lang2].forEach(el => el.classList.remove('language-swapping'));
-        }, 600);
-    });
-    
-    elements.themeSwitch.addEventListener('change', () => {
-        document.body.classList.toggle('light-theme', elements.themeSwitch.checked);
-        localStorage.setItem('theme', elements.themeSwitch.checked ? 'light' : 'dark');
-    });
-    if (localStorage.getItem('theme') === 'light') {
-        elements.themeSwitch.checked = true;
-        document.body.classList.add('light-theme');
-    }
-
-    elements.fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
-    });
-});
 </script>
 </body>
 </html>
